@@ -8,7 +8,7 @@ from collections.abc import Callable
 from homeassistant.components.select import SelectEntity
 from homeassistant.config_entries import ConfigEntry
 from homeassistant.const import CONF_HOST, EVENT_HOMEASSISTANT_STOP
-from homeassistant.core import HomeAssistant, callback
+from homeassistant.core import Event, HomeAssistant, callback
 from homeassistant.helpers.entity_platform import AddEntitiesCallback
 from homeassistant.helpers.typing import ConfigType, DiscoveryInfoType
 
@@ -88,7 +88,11 @@ async def async_setup_platform(
     matrix = CrestronMatrix(host, port)
     await matrix.connect()
     hass.data.setdefault(DOMAIN, {})[host] = matrix
-    hass.bus.async_listen_once(EVENT_HOMEASSISTANT_STOP, matrix.close)
+
+    async def _close(_: Event) -> None:
+        await matrix.close()
+
+    hass.bus.async_listen_once(EVENT_HOMEASSISTANT_STOP, _close)
 
     async_add_entities([MatrixOutputSelect(matrix)], True)
 
@@ -119,6 +123,7 @@ class MatrixOutputSelect(SelectEntity):
 
     async def async_added_to_hass(self) -> None:
         """Register callbacks when entity is added."""
+
         @callback
         def update_from_event(route: int) -> None:
             self._attr_current_option = str(route)

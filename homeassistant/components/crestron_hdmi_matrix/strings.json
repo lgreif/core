@@ -1,24 +1,12 @@
 {
-  "config": {
-    "step": {
-      "user": {
-        "data": {
-          "host": "[%key:common::config_flow::data::host%]"
+    "config": {
+        "step": {"user": {"data": {"host": "[%key:common::config_flow::data::host%]"}}},
+        "error": {
+            "cannot_connect": "[%key:common::config_flow::error::cannot_connect%]"
+        },
+        "abort": {
+            "already_configured": "[%key:common::config_flow::abort::already_configured_device%]"
         }
-      }
     },
-    "error": {
-      "cannot_connect": "[%key:common::config_flow::error::cannot_connect%]"
-    },
-    "abort": {
-      "already_configured": "[%key:common::config_flow::abort::already_configured_device%]"
-    }
-  },
-  "entity": {
-    "select": {
-      "input": {
-        "name": "Input"
-      }
-    }
-  }
+    "entity": {"select": {"input": {"name": "Input"}}}
 }

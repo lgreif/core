@@ -4,7 +4,7 @@ from __future__ import annotations
 
 from homeassistant.config_entries import ConfigEntry
 from homeassistant.const import CONF_HOST, EVENT_HOMEASSISTANT_STOP, Platform
-from homeassistant.core import HomeAssistant
+from homeassistant.core import Event, HomeAssistant
 
 from .const import DEFAULT_PORT, DOMAIN
 from .select import CrestronMatrix
@@ -25,7 +25,11 @@ async def async_setup_entry(hass: HomeAssistant, entry: ConfigEntry) -> bool:
     await matrix.connect()
 
     hass.data.setdefault(DOMAIN, {})[entry.entry_id] = matrix
-    hass.bus.async_listen_once(EVENT_HOMEASSISTANT_STOP, matrix.close)
+
+    async def _close(_: Event) -> None:
+        await matrix.close()
+
+    hass.bus.async_listen_once(EVENT_HOMEASSISTANT_STOP, _close)
 
     await hass.config_entries.async_forward_entry_setups(entry, PLATFORMS)
     return True
