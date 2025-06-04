@@ -9,7 +9,10 @@ from homeassistant.components.select import SelectEntity
 from homeassistant.config_entries import ConfigEntry
 from homeassistant.const import CONF_HOST, EVENT_HOMEASSISTANT_STOP
 from homeassistant.core import Event, HomeAssistant, callback
-from homeassistant.helpers.entity_platform import AddEntitiesCallback
+from homeassistant.helpers.entity_platform import (
+    AddConfigEntryEntitiesCallback,
+    AddEntitiesCallback,
+)
 from homeassistant.helpers.typing import ConfigType, DiscoveryInfoType
 
 from .const import DEFAULT_PORT, DOMAIN
@@ -26,6 +29,7 @@ class CrestronMatrix:
         self.writer: asyncio.StreamWriter | None = None
         self._callbacks: list[Callable[[int], None]] = []
         self._current_route = 1
+        self._reader_task: asyncio.Task | None = None
 
     async def connect(self) -> None:
         """Open the connection and start reader task."""
@@ -38,7 +42,7 @@ class CrestronMatrix:
         if self.writer:
             self.writer.close()
             await self.writer.wait_closed()
-        if hasattr(self, "_reader_task"):
+        if self._reader_task:
             self._reader_task.cancel()
 
     async def _read_loop(self) -> None:
@@ -65,9 +69,9 @@ class CrestronMatrix:
         """Route an input to the output."""
         await self.send(f"conf output {output} route {input_no}")
 
-    def register_callback(self, callback: Callable[[int], None]) -> None:
+    def register_callback(self, cb: Callable[[int], None]) -> None:
         """Register a callback for route updates."""
-        self._callbacks.append(callback)
+        self._callbacks.append(cb)
 
     @property
     def route(self) -> int:
@@ -100,7 +104,7 @@ async def async_setup_platform(
 async def async_setup_entry(
     hass: HomeAssistant,
     entry: ConfigEntry,
-    async_add_entities: AddEntitiesCallback,
+    async_add_entities: AddConfigEntryEntitiesCallback,
 ) -> None:
     """Set up the select entity from config entry."""
     matrix: CrestronMatrix = hass.data[DOMAIN][entry.entry_id]
