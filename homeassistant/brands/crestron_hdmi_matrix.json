@@ -1,0 +1,5 @@
+{
+    "domain": "crestron_hdmi_matrix",
+    "name": "Crestron",
+    "integrations": ["crestron_hdmi_matrix"]
+}
