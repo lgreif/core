@@ -1,0 +1,25 @@
+{
+    "config": {
+        "step": {
+            "user": {
+                "title": "Set up Crestron HDMI Matrix",
+                "data": {
+                    "host": "Host"
+                }
+            }
+        },
+        "error": {
+            "cannot_connect": "Failed to connect"
+        },
+        "abort": {
+            "already_configured": "Device is already configured"
+        }
+    },
+    "entity": {
+        "select": {
+            "input": {
+                "name": "Input"
+            }
+        }
+    }
+}
